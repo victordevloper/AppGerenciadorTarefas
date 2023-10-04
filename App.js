@@ -1,25 +1,33 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList} from 'react-native';
 import { FontAwesome} from '@expo/vector-icons'
-import tarefas from './my-app/tarefas';
 import Tarefas from './my-app/tarefas';
 
 export default function App() {
 
   const [tarefa, setTarefa] = useState('');
-  const [list, setList] = useState ([
-    {
-      key: '1', 
-      item: 'Comprar dinossauro'
-    },
-    {
-      key: '2', 
-      item: 'Lavar pão'
-    }
-  ])
+  const [list, setList] = useState ([])
 
-  function ChangeName(){
-    alert(tarefa)
+  function handleAdd(){
+      if(tarefa === ''){
+        return;
+      }
+      
+      const dados = {
+        key: Date.now(),
+        item: tarefa
+      }
+
+      setList(oldArray => [dados, ...oldArray])
+      setTarefa('')
+  }
+
+  function handleDelete(){
+    if(list.length === 0){
+      return;
+    }
+
+    setList(oldArray => oldArray.slice(1))
   }
 
   return (
@@ -27,12 +35,16 @@ export default function App() {
       <Text style={styles.title}>Tarefas</Text>
       <View style={styles.containerInput}>
           <TextInput placeholder='Digite a sua tarefa' style={styles.input} value={tarefa} onChangeText={(text) => setTarefa(text)}/>
-            <TouchableOpacity style={styles.buttonAdd} onPress={ChangeName}>
+            <TouchableOpacity style={styles.buttonAdd} onPress={handleAdd}>
             <FontAwesome name="plus" size={20} color={"#fff"}/>
           </TouchableOpacity>
       </View>
 
-      <FlatList data={list} keyExtractor={(item) => item.key} renderItem={({item}) => <Tarefas data={item}/>}/>
+      <FlatList data={list}
+      keyExtractor={(item) => item.key}
+      renderItem={({item}) => <Tarefas data={item} deleteItem={() => handleDelete(item.item)}/>}
+      style={styles.list}
+      />
     </View> 
   );
 }
@@ -57,7 +69,7 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: "center",
-    marginBottom: "10",
+    marginBottom: 20,
   },
   input:{
     backgroundColor: "#fff",
@@ -74,5 +86,11 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     justifyContent: "center",
     alignItems: "center"
+  },
+  list:{
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingStart: '4%',
+    paddingEnd: '4%'
   }
 });
